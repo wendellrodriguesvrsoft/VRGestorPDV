@@ -27,10 +27,13 @@
     "typeorm:create": "npm run typeorm -- migration:create"
   },
   "dependencies": {
+    "@golevelup/nestjs-discovery": "3.0.0",
+    "@golevelup/nestjs-rabbitmq": "3.4.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^9.0.0",
     "@nestjs/mapped-types": "*",
+    "@nestjs/microservices": "9.1.2",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/typeorm": "^11.0.0",
     "class-transformer": "^0.5.1",
