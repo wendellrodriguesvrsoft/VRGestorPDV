@@ -12,7 +12,7 @@ export class PDV {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @PrimaryGeneratedColumn('uuid')
   uuid: string;
 
   @Column({ default: true })

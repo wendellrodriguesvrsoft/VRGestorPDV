@@ -4,8 +4,4 @@ export class CreatePdvDto {
   @IsDefined()
   @IsInt()
   idLoja!: number;
-
-  @IsDefined()
-  @IsString()
-  uuid!: string;
 }
