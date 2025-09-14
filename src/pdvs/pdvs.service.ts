@@ -1,26 +1,43 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreatePdvDto } from './dto/create-pdv.dto';
 import { UpdatePdvDto } from './dto/update-pdv.dto';
+import { PDV } from './entities/pdv.entity';
 
 @Injectable()
 export class PdvsService {
-  create(createPdvDto: CreatePdvDto) {
-    return 'This action adds a new pdv';
+  constructor(
+    @InjectRepository(PDV)
+    private readonly pdvRepository: Repository<PDV>,
+  ) {}
+
+  async create(dto: CreatePdvDto): Promise<PDV> {
+    const pdv = this.pdvRepository.create(dto);
+    return this.pdvRepository.save(pdv);
   }
 
-  findAll() {
-    return `This action returns all pdvs`;
+  async findAll(): Promise<PDV[]> {
+    return this.pdvRepository.find({ relations: ['loja'] });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} pdv`;
+  async findOne(id: number): Promise<PDV> {
+    const pdv = await this.pdvRepository.findOne({
+      where: { id },
+      relations: ['loja'],
+    });
+    if (!pdv) throw new NotFoundException(`PDV ${id} não encontrado`);
+    return pdv;
   }
 
-  update(id: number, updatePdvDto: UpdatePdvDto) {
-    return `This action updates a #${id} pdv`;
+  async update(id: number, dto: UpdatePdvDto): Promise<PDV> {
+    const pdv = await this.findOne(id);
+    Object.assign(pdv, dto);
+    return this.pdvRepository.save(pdv);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} pdv`;
+  async remove(id: number): Promise<void> {
+    const pdv = await this.findOne(id);
+    await this.pdvRepository.remove(pdv);
   }
 }
