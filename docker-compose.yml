@@ -36,6 +36,24 @@ services:
     networks:
       - vrgestaopdv-net
 
+  vrgestorpdv-rabbitmq:
+    build:
+      context: ./.docker/rabbitmq
+      dockerfile: Dockerfile
+    container_name: vrgestorpdv-rabbitmq
+    volumes:
+      - ./db/rabbitmq:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=vr
+      - RABBITMQ_DEFAULT_PASS=vr!RbtMQ
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - vrgestaopdv-net
+
+    mem_limit: $MEM_LIMIT_API
+
 volumes:
   postgres_data:
     driver: local
