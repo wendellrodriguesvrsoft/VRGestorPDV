@@ -5,6 +5,7 @@ import { AssociatePdvDto, CreatePdvDto } from './dto/create-pdv.dto';
 import { UpdatePdvDto } from './dto/update-pdv.dto';
 import { PDV } from './entities/pdv.entity';
 import { createQueue } from '../rabbitmq/create-queue.helper';
+import { ResponseData } from '../shared/interfaces/helper.interface';
 
 @Injectable()
 export class PdvsService {
@@ -18,8 +19,15 @@ export class PdvsService {
     return this.pdvRepository.save(pdv);
   }
 
-  async findAll(): Promise<PDV[]> {
-    return this.pdvRepository.find({ relations: ['loja'] });
+  async findAll(): Promise<ResponseData<PDV>> {
+    const [result, total] = await this.pdvRepository.findAndCount({
+      relations: ['loja'],
+    });
+    return {
+      data: result,
+      count: +total,
+      pageSize: +total,
+    };
   }
 
   async findOne(id: number): Promise<PDV> {
@@ -42,16 +50,15 @@ export class PdvsService {
     await this.pdvRepository.remove(pdv);
   }
 
-  async associatePdv(
-    dto: AssociatePdvDto
-  ){
-    const pdv = await this.pdvRepository.createQueryBuilder('pdv')
-    .where('pdv.uuid = :uuid', { uuid: dto.uuid })
-    .leftJoinAndSelect('pdv.loja', 'loja')
-    .leftJoinAndSelect('loja.rede', 'rede')
-    .getOne();
+  async associatePdv(dto: AssociatePdvDto): Promise<PDV> {
+    const pdv = await this.pdvRepository
+      .createQueryBuilder('pdv')
+      .where('pdv.uuid = :uuid', { uuid: dto.uuid })
+      .leftJoinAndSelect('pdv.loja', 'loja')
+      .leftJoinAndSelect('loja.rede', 'rede')
+      .getOne();
 
-    if(!pdv) throw new NotFoundException(`PDV ${dto.uuid} não encontrado`);
+    if (!pdv) throw new NotFoundException(`PDV ${dto.uuid} não encontrado`);
     pdv.ativo = true;
 
     return this.pdvRepository.save(pdv);

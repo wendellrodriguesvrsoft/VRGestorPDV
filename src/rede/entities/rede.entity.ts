@@ -1,6 +1,8 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Empresa } from '../../empresa/entities/empresa.entity';
 import { Loja } from '../../lojas/entities/loja.entity';
+import { CreateRedeDto } from '../dto/create-rede.dto';
+import { UpdateRedeDto } from '../dto/update-rede.dto';
 
 @Entity({ name: 'rede' })
 export class Rede {
@@ -22,4 +24,8 @@ export class Rede {
 
   @Column('boolean', { default: true })
   ativo!: boolean;
+
+  constructor(createRedeDto: CreateRedeDto | UpdateRedeDto) {
+    Object.assign(this, createRedeDto);
+  }
 }
