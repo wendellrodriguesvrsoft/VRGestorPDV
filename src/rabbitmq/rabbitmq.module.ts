@@ -11,9 +11,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => {
-        const user = config.get<string>('QUEUE_LOGIN') || 'guest';
-        const password = config.get<string>('QUEUE_PASSWORD') || 'guest';
-        const host = config.get<string>('QUEUE_DOCKER') || 'vrrabbitmq';
+        const user = config.get<string>('QUEUE_LOGIN');
+        const password = config.get<string>('QUEUE_PASSWORD');
+        const host = config.get<string>('QUEUE_DOCKER') || 'vrgestorpdv-rabbitmq';
         const port = config.get<number>('QUEUE_PORT') || 5672;
 
         return {

@@ -5,12 +5,14 @@ import { AssociatePdvDto, CreatePdvDto } from './dto/create-pdv.dto';
 import { UpdatePdvDto } from './dto/update-pdv.dto';
 import { PDV } from './entities/pdv.entity';
 import { createQueue } from '../rabbitmq/create-queue.helper';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class PdvsService {
   constructor(
     @InjectRepository(PDV)
     private readonly pdvRepository: Repository<PDV>,
+    private readonly amqp: AmqpConnection
   ) {}
 
   async create(dto: CreatePdvDto): Promise<PDV> {
@@ -50,10 +52,15 @@ export class PdvsService {
     .leftJoinAndSelect('pdv.loja', 'loja')
     .leftJoinAndSelect('loja.rede', 'rede')
     .getOne();
+    console.log(pdv);
 
     if(!pdv) throw new NotFoundException(`PDV ${dto.uuid} não encontrado`);
     pdv.ativo = true;
-
+    createQueue(this.amqp, `update-pdv-${pdv.loja.rede.id}`, pdv.id, this.sendFile.bind(this));
     return this.pdvRepository.save(pdv);
+  }
+
+  sendFile(){
+    console.log('Enviando arquivo para o PDV...');
   }
 }

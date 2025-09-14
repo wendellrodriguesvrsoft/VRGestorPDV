@@ -11,7 +11,7 @@ type MessageHandler<T = any> = (
 export async function createQueue(
   amqp: AmqpConnection,
   exchange: string,
-  redes: number[],
+  pdv: number,
   handler: MessageHandler,
 ) {
   const api = process.env.API_NAME;
@@ -29,11 +29,10 @@ export async function createQueue(
   const channelWrapper = amqp.managedConnection.createChannel({
     json: true,
     setup: async (channel: Channel) => {
-      for (const idRede of redes) {
-        const queue = `${exchange}-${idRede}`;
+        const queue = `${exchange}-${pdv}`;
         const retryQueue = `${queue}-retry`;
         const dlq = `${queue}-dlq`;
-        const routingKey = `rede.${idRede}.${exchange}`;
+        const routingKey = `rede.${pdv}.${exchange}`;
 
         await channel.assertQueue(dlq, { durable: true });
 
@@ -118,7 +117,6 @@ export async function createQueue(
           `✅ Listening on queue [${queue}] with [${routingKey}]`,
           'RabbitMQ',
         );
-      }
     },
   });
 

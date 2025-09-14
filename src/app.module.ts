@@ -9,10 +9,15 @@ import { RedeModule } from './rede/rede.module';
 import { PdvsModule } from './pdvs/pdvs.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmpresaModule } from './empresa/empresa.module';
+import { RabbitMQSharedModule } from './rabbitmq/rabbitmq.module';
+const ENV = process.env.NODE_ENV;
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+       isGlobal: true,
+       envFilePath: !ENV ? '.env' : `.env.${ENV}`,
+      }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -30,6 +35,7 @@ import { EmpresaModule } from './empresa/empresa.module';
       }),
       inject: [ConfigService],
     }),
+    RabbitMQSharedModule,
     UsuariosModule,
     LojasModule,
     RedeModule,
