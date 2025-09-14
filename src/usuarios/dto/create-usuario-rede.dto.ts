@@ -25,4 +25,8 @@ export class CreateUsuarioRedeDto {
   @IsArray()
   @IsNumber({}, { each: true })
   idLojas!: number[];
+
+  @IsDefined()
+  @IsInt()
+  idLojaPadrao!: number;
 }

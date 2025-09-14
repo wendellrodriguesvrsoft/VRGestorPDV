@@ -6,11 +6,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { CreateUsuarioDto } from '../dto/create-usuario.dto';
-import { UpdateUsuarioDto } from '../dto/update-usuario.dto';
 import { Usuarios } from './usuarios.entity';
 
-@Entity({ name: 'usuariorede' })
+@Entity({ name: 'usuariosrede' })
 export class UsuarioRede {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -38,7 +36,11 @@ export class UsuarioRede {
   @JoinColumn({ name: 'idUsuario' })
   usuarios!: Usuarios;
 
-  constructor(createUsuarioDto: CreateUsuarioDto | UpdateUsuarioDto) {
-    Object.assign(this, createUsuarioDto);
+  idUsuario!: number;
+
+  constructor(createUsuarioRedeDto?: Partial<UsuarioRede>) {
+    if (createUsuarioRedeDto) {
+      Object.assign(this, createUsuarioRedeDto);
+    }
   }
 }

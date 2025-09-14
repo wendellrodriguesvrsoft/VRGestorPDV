@@ -1,1 +1,25 @@
-export class Rede {}
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Empresa } from '../../empresa/entities/empresa.entity';
+import { Loja } from '../../lojas/entities/loja.entity';
+
+@Entity({ name: 'rede' })
+export class Rede {
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @Column('varchar', { length: 100, nullable: false })
+  descricao!: string;
+
+  @OneToMany(() => Loja, (loja) => loja.rede, {
+    cascade: false,
+  })
+  loja?: Loja[];
+
+  @OneToMany(() => Empresa, (empresa) => empresa.rede, {
+    cascade: false,
+  })
+  empresa?: Empresa;
+
+  @Column('boolean', { default: true })
+  ativo!: boolean;
+}
