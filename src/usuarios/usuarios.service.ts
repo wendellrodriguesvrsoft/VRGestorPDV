@@ -3,6 +3,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Usuarios } from './entities/usuarios.entity';
+import { UsuarioRede } from './entities/usuarios-rede.entity';
 import { ResponseData } from '../shared/interfaces/helper.interface';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
@@ -13,6 +14,8 @@ export class UsuariosService {
   constructor(
     @InjectRepository(Usuarios)
     private usuariosRepository: Repository<Usuarios>,
+    @InjectRepository(UsuarioRede)
+    private usuarioRedeRepository: Repository<UsuarioRede>,
   ) {}
 
   async findAll(): Promise<ResponseData<Usuarios>> {
@@ -50,28 +53,64 @@ export class UsuariosService {
         throw new BadRequestException('Email já cadastrado');
       }
 
-      const mergedUsuario = {
+      if (
+        createUsuarioDto.usuariosRede &&
+        createUsuarioDto.usuariosRede.length > 0
+      ) {
+        const usuarioRedeRecords = createUsuarioDto.usuariosRede.map(
+          (usuarioRedeDto) => {
+            const usuarioRede = new UsuarioRede(usuarioRedeDto);
+            usuarioRede.usuarios = usuario;
+            return usuarioRede;
+          },
+        );
+
+        await this.usuarioRedeRepository.save(usuarioRedeRecords);
+      }
+
+      const updatedUsuario = {
         ...createUsuarioDto,
         ...usuario,
         senha: usuario.senha,
-        usuariosRede: [
-          ...createUsuarioDto.usuariosRede,
-          ...usuario.usuariosRede,
-        ],
       };
 
-      delete (mergedUsuario as unknown as UpdateUsuarioDto).senha;
+      delete (updatedUsuario as unknown as UpdateUsuarioDto).senha;
 
-      return this.usuariosRepository.save(mergedUsuario as Usuarios);
+      const savedUsuario = await this.usuariosRepository.save(
+        updatedUsuario as Usuarios,
+      );
+
+      return this.usuariosRepository.findOne({
+        where: { id: savedUsuario.id },
+        relations: ['usuariosRede'],
+      });
     }
 
     const newUsuario = new Usuarios(createUsuarioDto);
     const created = await this.usuariosRepository.save(newUsuario);
 
+    if (
+      createUsuarioDto.usuariosRede &&
+      createUsuarioDto.usuariosRede.length > 0
+    ) {
+      const usuarioRedeRecords = createUsuarioDto.usuariosRede.map(
+        (usuarioRedeDto) => {
+          const usuarioRede = new UsuarioRede(usuarioRedeDto);
+          usuarioRede.usuarios = created;
+          usuarioRede.idUsuario = created.id;
+          return usuarioRede;
+        },
+      );
+
+      await this.usuarioRedeRepository.save(usuarioRedeRecords);
+    }
+
     return this.usuariosRepository.findOne({
       where: { id: created.id },
+      relations: ['usuariosRede'],
     });
   }
+
   async findOne(id: number): Promise<Usuarios> {
     const usuario = await this.usuariosRepository
       .createQueryBuilder('usuario')

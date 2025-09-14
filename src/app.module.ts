@@ -8,6 +8,7 @@ import { LojasModule } from './lojas/lojas.module';
 import { RedeModule } from './rede/rede.module';
 import { PdvsModule } from './pdvs/pdvs.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { EmpresaModule } from './empresa/empresa.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     LojasModule,
     RedeModule,
     PdvsModule,
+    EmpresaModule,
   ],
 
   controllers: [AppController],
