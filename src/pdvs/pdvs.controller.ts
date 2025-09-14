@@ -8,7 +8,7 @@ import {
   Delete,
 } from '@nestjs/common';
 import { PdvsService } from './pdvs.service';
-import { CreatePdvDto } from './dto/create-pdv.dto';
+import { AssociatePdvDto, CreatePdvDto } from './dto/create-pdv.dto';
 import { UpdatePdvDto } from './dto/update-pdv.dto';
 
 @Controller('pdvs')
@@ -39,4 +39,10 @@ export class PdvsController {
   remove(@Param('id') id: string) {
     return this.pdvsService.remove(+id);
   }
+
+  @Post('/associar')
+  associatePdv(@Body() associatePdvDto: AssociatePdvDto) {
+    return this.pdvsService.associatePdv(associatePdvDto);
+  }
+
 }

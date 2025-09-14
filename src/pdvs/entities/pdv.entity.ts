@@ -15,7 +15,7 @@ export class PDV {
   @PrimaryGeneratedColumn('uuid')
   uuid: string;
 
-  @Column({ default: true })
+  @Column({ default: false })
   ativo: boolean;
 
   @ManyToOne(() => Loja, (loja) => loja.pdvs, { onDelete: 'CASCADE' })
