@@ -9,6 +9,8 @@ import {
 import { PDV } from '../../pdvs/entities/pdv.entity';
 import { Rede } from '../../rede/entities/rede.entity';
 import { Empresa } from '../../empresa/entities/empresa.entity';
+import { CreateLojaDto } from '../dto/create-loja.dto';
+import { UpdateLojaDto } from '../dto/update-loja.dto';
 
 @Entity('loja')
 export class Loja {
@@ -35,11 +37,9 @@ export class Loja {
   @JoinColumn({ name: 'idEmpresa' })
   empresa!: Empresa;
 
-  @ManyToOne(() => Rede, (rede) => rede.loja, {
-    nullable: false,
-    cascade: false,
-    eager: true,
-  })
-  @JoinColumn({ name: 'idRede' })
-  rede!: Rede;
+  constructor(
+    payload: CreateLojaDto | UpdateLojaDto,
+  ) {
+    Object.assign(this, payload);
+  }
 }

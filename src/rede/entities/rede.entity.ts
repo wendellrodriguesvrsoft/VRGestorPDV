@@ -12,11 +12,6 @@ export class Rede {
   @Column('varchar', { length: 100, nullable: false })
   descricao!: string;
 
-  @OneToMany(() => Loja, (loja) => loja.rede, {
-    cascade: false,
-  })
-  loja?: Loja[];
-
   @OneToMany(() => Empresa, (empresa) => empresa.rede, {
     cascade: false,
   })

@@ -15,6 +15,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         const password = config.get<string>('QUEUE_PASSWORD') || 'guest';
         const host = config.get<string>('QUEUE_DOCKER') || 'vrrabbitmq';
         const port = config.get<number>('QUEUE_PORT') || 5672;
+        console.log('****************');
+        console.log('RabbitMQ Configurations:');
+        console.log(`  User: ${user}`);
+        console.log(`  Password: ${password}`);
+        console.log(`  Host: ${host}`);
+        console.log(`  Port: ${port}`);
 
         return {
           exchanges: [

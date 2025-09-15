@@ -46,7 +46,7 @@ export class PdvsController {
   }
 
   @Post('/associar')
-  associatePdv(@Body() associatePdvDto: AssociatePdvDto): Promise<void> {
+  associatePdv(@Body() associatePdvDto: AssociatePdvDto): Promise<PDV> {
     return this.pdvsService.associatePdv(associatePdvDto);
   }
 }

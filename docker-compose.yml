@@ -22,7 +22,7 @@ services:
       - '.:/home/node/app'
     entrypoint: ./.docker/entrypoint.sh
     environment:
-      - NODE_ENV=${NODE_ENV:-development}
+      - NODE_ENV=development
       - PORT=${PORT:-3000}
       - DB_HOST=postgres
       - DB_PORT=5432

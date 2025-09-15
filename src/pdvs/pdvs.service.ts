@@ -6,12 +6,14 @@ import { UpdatePdvDto } from './dto/update-pdv.dto';
 import { PDV } from './entities/pdv.entity';
 import { createQueue } from '../rabbitmq/create-queue.helper';
 import { ResponseData } from '../shared/interfaces/helper.interface';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class PdvsService {
   constructor(
     @InjectRepository(PDV)
     private readonly pdvRepository: Repository<PDV>,
+    private readonly amqp: AmqpConnection,
   ) {}
 
   async create(dto: CreatePdvDto): Promise<PDV> {
@@ -55,12 +57,20 @@ export class PdvsService {
       .createQueryBuilder('pdv')
       .where('pdv.uuid = :uuid', { uuid: dto.uuid })
       .leftJoinAndSelect('pdv.loja', 'loja')
-      .leftJoinAndSelect('loja.rede', 'rede')
+      .leftJoinAndSelect('loja.empresa', 'empresa')
+      .leftJoinAndSelect('empresa.rede', 'rede')
       .getOne();
 
     if (!pdv) throw new NotFoundException(`PDV ${dto.uuid} não encontrado`);
+    createQueue(this.amqp, `update-status-pdv-${pdv.loja.empresa.rede.id}`, pdv.id, this.updateStatusPdv.bind(this));
+    createQueue(this.amqp, `update-files-pdv-${pdv.loja.empresa.rede.id}`, pdv.id, this.updateStatusPdv.bind(this), false);
+
     pdv.ativo = true;
 
     return this.pdvRepository.save(pdv);
+  }
+
+  updateStatusPdv(payload: unknown) {
+    console.log('Payload recebido no PDV Service:', payload);
   }
 }

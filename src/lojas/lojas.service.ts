@@ -13,7 +13,9 @@ export class LojasService {
   ) {}
 
   async create(dto: CreateLojaDto): Promise<Loja> {
-    const loja = this.lojaRepository.create(dto);
+    const loja = new Loja(dto);
+    console.log(loja);
+
     return this.lojaRepository.save(loja);
   }
 

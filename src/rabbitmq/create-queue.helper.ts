@@ -11,17 +11,10 @@ type MessageHandler<T = any> = (
 export async function createQueue(
   amqp: AmqpConnection,
   exchange: string,
-  redes: number[],
+  pdv: number,
   handler: MessageHandler,
+  createConsumer = true,
 ) {
-  const api = process.env.API_NAME;
-  if (!api) {
-    throw new Error(`
-            ********************************
-            * API_NAME não definido no env *
-            ********************************
-        `);
-  }
 
   const dlPattern = process.env.DL_PATTERN ?? 'criar-deadletter';
   const dlQueue = process.env.DL_QUEUE ?? 'vrmaster.monitor-filas.deadletter';
@@ -29,13 +22,13 @@ export async function createQueue(
   const channelWrapper = amqp.managedConnection.createChannel({
     json: true,
     setup: async (channel: Channel) => {
-      for (const idRede of redes) {
-        const queue = `${exchange}-${idRede}`;
+        const queue = `${exchange}-${pdv}`;
         const retryQueue = `${queue}-retry`;
-        const dlq = `${queue}-dlq`;
-        const routingKey = `rede.${idRede}.${exchange}`;
+        const routingKey = `rede.${pdv}.${exchange}`;
 
-        await channel.assertQueue(dlq, { durable: true });
+        await channel.assertExchange(exchange, 'topic', {
+          durable: true,
+        });
 
         await channel.assertQueue(retryQueue, {
           durable: true,
@@ -56,7 +49,7 @@ export async function createQueue(
 
         await channel.bindQueue(queue, exchange, routingKey);
         await channel.prefetch(1);
-
+        if(createConsumer){
         await channel.consume(queue, async (msg) => {
           if (!msg) return;
 
@@ -87,38 +80,21 @@ export async function createQueue(
                   erro,
                   routingKey,
                   exchange,
-                  api,
                 }),
               );
-              channel.sendToQueue(dlq, buffer, {
-                headers: msg.properties.headers,
-              });
+              // channel.sendToQueue(dlq, buffer, {
+              //   headers: msg.properties.headers,
+              // });
               channel.ack(msg);
             }
           }
         });
-
-        await channel.consume(dlq, async (msg) => {
-          const data = JSON.parse(msg?.content.toString() as string);
-
-          channel.sendToQueue(
-            dlQueue,
-            Buffer.from(
-              JSON.stringify({
-                data,
-                pattern: dlPattern,
-              }),
-            ),
-            {},
-          );
-          channel.ack(msg as ConsumeMessage);
-        });
+        }
 
         Logger.log(
           `✅ Listening on queue [${queue}] with [${routingKey}]`,
           'RabbitMQ',
         );
-      }
     },
   });
 
